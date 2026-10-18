@@ -1,7 +1,7 @@
 const API_KEY = "6896f3f";
 const BASE_URL = "https://www.omdbapi.com/";
-export async function getMovie(id) {
-  const response = await fetch(`${BASE_URL}?apikey=${API_KEY}&i=${id}&plot=full`);
+export async function getMovie(id, plot = "full") {
+  const response = await fetch(`${BASE_URL}?apikey=${API_KEY}&i=${id}&plot=${plot}`);
   if (!response.ok) throw new Error("Erreur HTTP " + response.status);
   const data = await response.json();
   if (data.Response === "False") throw new Error(data.Error);

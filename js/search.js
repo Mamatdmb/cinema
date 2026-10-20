@@ -1,57 +1,48 @@
-import { searchMovies } from "./api.js";
+import { appelerApi } from "./api.js";
 import { creerCarte } from "./affichage.js";
 
 const champ = document.getElementById("recherche");
 const resultats = document.getElementById("resultats");
 const message = document.getElementById("message");
 const bouton = document.getElementById("load-more");
-
-let recherche = "";
 let page = 1;
-let delai;
 
-async function chercher(nouvelleRecherche) {
-  if (nouvelleRecherche) {
-    page = 1;
-    resultats.replaceChildren();
-  }
-
-  if (recherche.length < 3) {
-    message.textContent = "Tape au moins 3 lettres";
-    bouton.hidden = true;
-    return;
-  }
-
-  const requete = recherche;
-  message.textContent = "Recherche en cours...";
-
+async function chercher() {
   try {
-    const { films, total } = await searchMovies(requete, page);
-    if (requete !== recherche) return;
-
-    if (total === 0) {
+    const data = await appelerApi("&s=" + champ.value + "&page=" + page);
+    if (page === 1) {
+      resultats.innerHTML = "";
+    }
+    if (data.Response === "False") {
       message.textContent = "Aucun résultat";
-      bouton.hidden = true;
+      bouton.style.display = "none";
       return;
     }
-
-    message.textContent = `${total} résultat(s)`;
-    films.forEach((film) => resultats.appendChild(creerCarte(film)));
-    bouton.hidden = page * 10 >= total;
+    message.textContent = "";
+    data.Search.forEach((film) => {
+      resultats.appendChild(creerCarte(film));
+    });
+    bouton.style.display = "block";
   } catch (erreur) {
-    message.textContent = "Erreur : " + erreur.message;
+    console.error("Erreur :", erreur);
   }
 }
 
-champ.addEventListener("input", () => {
-  clearTimeout(delai);
-  delai = setTimeout(() => {
-    recherche = champ.value.trim();
-    chercher(true);
-  }, 400);
-});
+function nouvelleRecherche() {
+  page = 1;
+  if (champ.value.length >= 3) {
+    chercher();
+  } else {
+    resultats.innerHTML = "";
+    message.textContent = "Tape au moins 3 lettres";
+    bouton.style.display = "none";
+  }
+}
 
-bouton.addEventListener("click", () => {
-  page++;
-  chercher(false);
-});
+function chargerPlus() {
+  page = page + 1;
+  chercher();
+}
+
+champ.addEventListener("keyup", nouvelleRecherche);
+bouton.addEventListener("click", chargerPlus);

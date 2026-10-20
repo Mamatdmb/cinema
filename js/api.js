@@ -7,4 +7,4 @@ export async function appelerApi(parametres) {
   }
   const data = await response.json();
   return data;
-}
+} 

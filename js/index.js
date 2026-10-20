@@ -1,31 +1,33 @@
-import { getMovie, searchMovies } from "./api.js";
+import { appelerApi } from "./api.js";
 import { creerCarte } from "./affichage.js";
 
-const TENDANCES = ["tt15239678", "tt6263850", "tt22022452", "tt9218128", "tt1262426", "tt13622970"];
-
-const conteneur = document.getElementById("films");
+const films = document.getElementById("films");
 const bouton = document.getElementById("load-more");
-let page = 0;
+const tendances = ["tt15239678", "tt6263850", "tt22022452"];
+let page = 1;
 
-async function afficherTendances() {
+async function afficherTendance(id) {
   try {
-    const films = await Promise.all(TENDANCES.map((id) => getMovie(id, "short")));
-    films.forEach((film) => conteneur.appendChild(creerCarte(film, true)));
+    const film = await appelerApi("&i=" + id);
+    films.appendChild(creerCarte(film));
   } catch (erreur) {
-    conteneur.textContent = "Erreur : " + erreur.message;
+    console.error("Erreur :", erreur);
   }
 }
 
 async function chargerPlus() {
-  page++;
   try {
-    const { films, total } = await searchMovies("love", page, "2024");
-    films.forEach((film) => conteneur.appendChild(creerCarte(film)));
-    if (page * 10 >= total) bouton.hidden = true;
+    const data = await appelerApi("&s=love&y=2024&page=" + page);
+    data.Search.forEach((film) => {
+      films.appendChild(creerCarte(film));
+    });
+    page = page + 1;
   } catch (erreur) {
-    bouton.textContent = "Erreur : " + erreur.message;
+    console.error("Erreur :", erreur);
   }
 }
 
+tendances.forEach((id) => {
+  afficherTendance(id);
+});
 bouton.addEventListener("click", chargerPlus);
-afficherTendances();

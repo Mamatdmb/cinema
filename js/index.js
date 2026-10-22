@@ -3,7 +3,7 @@ import { creerCarte } from "./affichage.js";
 
 const films = document.getElementById("films");
 const bouton = document.getElementById("load-more");
-const tendances = ["tt15239678", "tt6263850", "tt22022452"];
+const tendances = ["tt1205489", "tt0120689", "tt1454029"];
 let page = 1;
 
 async function afficherTendance(id) {
